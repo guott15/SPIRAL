@@ -139,7 +139,7 @@ def get_negtive_nodes(nodes,dist,adj,N_WALK_LEN,NUM_NEG,dist_aware):
         negtive_pairs.extend([[node, neg_node] for neg_node in neg_samples])
     return negtive_pairs
 
-def load_data(feat_file,edge_file,SEP,N_WALKS,WALK_LEN,N_WALK_LEN,NUM_NEG,dist_aware=True,hvg_file=None):
+def load_data(feat_file,edge_file,SEP,dist_aware=True,hvg_file=None):
     feat=pd.read_csv(feat_file[0],header=0,index_col=0,sep=SEP)
     edge=np.loadtxt(edge_file[0],dtype=str)
     if len(edge.shape)<2:
@@ -312,6 +312,7 @@ class UnsupervisedLoss(object):
 
             self.node_positive_pairs[node] = cur_pairs
         return self.positive_pairs
+    
     def get_loss_xent(self, embeddings, nodes):
         assert len(embeddings) == len(self.unique_nodes_batch)
         assert False not in [nodes[i]==self.unique_nodes_batch[i] for i in range(len(nodes))]
@@ -326,13 +327,11 @@ class UnsupervisedLoss(object):
             if len(pps) == 0 or len(nps) == 0:
                 continue
 
-            # Q * Exception(negative score)
             indexs = [list(x) for x in zip(*nps)]
             node_indexs = [node2index[x] for x in indexs[0]]
             neighb_indexs = [node2index[x] for x in indexs[1]]
             neg_score=torch.cat((neg_score,torch.sum(embeddings[node_indexs]*embeddings[neighb_indexs],dim=1)))
 
-            # multiple positive score
             indexs = [list(x) for x in zip(*pps)]
             node_indexs = [node2index[x] for x in indexs[0]]
             neighb_indexs = [node2index[x] for x in indexs[1]]
