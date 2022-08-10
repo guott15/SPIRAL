@@ -22,7 +22,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset,TensorDataset,DataLoader
 from torch.optim import Adam
 
-from ..pytorch_revgrad import RevGrad
+from pytorch_revgrad import RevGrad
 from .model import *
 from .utils import *
 from .layers import MeanAggregator, LSTMAggregator, MaxPoolAggregator, MeanPoolAggregator,PoolAggregator

@@ -26,7 +26,7 @@ from operator import itemgetter
 import random
 import time
 
-from ..pytorch_revgrad import RevGrad
+from pytorch_revgrad import RevGrad
 from .layers import MeanAggregator, LSTMAggregator, MaxPoolAggregator, MeanPoolAggregator,PoolAggregator
 
 seed=12345
