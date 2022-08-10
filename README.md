@@ -18,4 +18,4 @@ cd SPIRAL-main
 python setup.py build
 python setup.by install
 
-# Note: pytorch_revgrad should be in your current path.
+#### Note: pytorch_revgrad should be in your current path.
