@@ -17,7 +17,7 @@ SPIRAL consistis two consective modules
    clusters  
  * Ouput  
    aligned coordinates: Ncell x 2  
-* Demo can be obtained in Run_Spiral.ipynb
+* **Demo can be obtained in Run_Spiral.ipynb**
 # Installing
 download SPIRAL-main.zip  
 cd SPIRAL-main  
