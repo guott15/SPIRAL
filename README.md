@@ -20,7 +20,7 @@ SPIRAL consistis two consective modules
 * **Demo can be obtained in Run_Spiral.ipynb**
 # Installing
 git clone https://github.com/guott15/SPIRAL.git  
-cd SPIRAL
+cd SPIRAL  
 python setup.py build  
 python setup.by install  
 #### Note: pytorch_revgrad should be in your current path.
