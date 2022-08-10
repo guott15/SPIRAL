@@ -3,7 +3,7 @@ SPIRAL is a method for batch effect removing and coordinationg alignment for spa
 ![image](https://user-images.githubusercontent.com/17848453/183861675-b8b63081-83f3-4957-a3f8-0b822a4980cd.png)
 # Usage
 SPIRAL consistis two consective modules  
-* SPIRAL-integraion  
+* **SPIRAL-integraion**    
  * Input  
    feature mat: Ncell x Ngene    
    edge mat: Nedge x 2    
@@ -11,7 +11,7 @@ SPIRAL consistis two consective modules
 * Output  
    embeddings: Ncell x zdim  
    recovery gene expression: Ncell x Ngene  
-* SPIRAL-alignemnt  
+* **SPIRAL-alignemnt**  
  * Input    
    embeddings of SPIRAL-integration: Ncell x zdim  
    clusters  
