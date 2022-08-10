@@ -19,8 +19,8 @@ SPIRAL consistis two consective modules
    aligned coordinates: Ncell x 2  
 * **Demo can be obtained in Run_Spiral.ipynb**
 # Installing
-download SPIRAL-main.zip  
-cd SPIRAL-main  
+https://github.com/guott15/SPIRAL.git  
+cd SPIRAL
 python setup.py build  
 python setup.by install  
 #### Note: pytorch_revgrad should be in your current path.
