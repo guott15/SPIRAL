@@ -10,7 +10,7 @@ from pathlib import Path
 # In[ ]:
 
 
-__lib_name__ = "SPIRAL"
+__lib_name__ = "spiral"
 __lib_version__ = "1.0"
 __description__ = "Integrating and aligning spatially resolved transcriptomics data across different experiments, conditions, and technologies."
 __url__ = "https://github.com/guott15/SPIRAL"
