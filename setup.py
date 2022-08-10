@@ -22,7 +22,7 @@ __requires__ = [l.strip() for l in Path('requirements.txt').read_text('utf-8').s
 
 
 with open("README.md", "r") as fh:
-    long_description = fh.read()
+    __long_description__ = fh.read()
 
 setup(
     name = __lib_name__,
