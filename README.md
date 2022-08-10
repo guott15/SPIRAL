@@ -19,7 +19,7 @@ SPIRAL consistis two consective modules
    aligned coordinates: Ncell x 2  
 * **Demo can be obtained in Run_Spiral.ipynb**
 # Installing
-https://github.com/guott15/SPIRAL.git  
+git clone https://github.com/guott15/SPIRAL.git  
 cd SPIRAL
 python setup.py build  
 python setup.by install  
