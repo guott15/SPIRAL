@@ -36,6 +36,6 @@ setup(
     install_requires = __requires__,
     zip_safe = False,
     long_description = __long_description__,
-    python_requires='>=3.8'
+    python_requires='>=3.6'
 )
 
