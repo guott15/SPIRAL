@@ -18,7 +18,8 @@ __author__ = "Tiantian Guo"
 __author_email__ = "guott18@mails.tsinghua.edu.cn"
 __license__ = "MIT"
 __keywords__ = ["spatial transcriptomics", "Deep learning", "Batch effect", "Coordination Alignment"]
-__requires__ = [l.strip() for l in Path('requirements.txt').read_text('utf-8').splitlines()]
+# __requires__ = [l.strip() for l in Path('requirements.txt').read_text('utf-8').splitlines()]
+__requires__ = ["requests",]
 
 
 with open("README.md", "r") as fh:
