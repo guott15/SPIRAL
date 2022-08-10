@@ -4,14 +4,20 @@ SPIRAL is a method for batch effect removing and coordinationg alignment for spa
 # Usage
 SPIRAL consistis two consective modules  
 * SPIRAL-integraion  
-* Input
-** feature mat: Ncell x Ngene  
-** edge mat: Nedge x 2  
-** meta mat: Ncell x 2: domain label and batch label  
-* Output
+ * Input  
+   feature mat: Ncell x Ngene    
+   edge mat: Nedge x 2    
+   meta mat: Ncell x 2: domain label and batch label  
+* Output  
+   embeddings: Ncell x zdim  
+   recovery gene expression: Ncell x Ngene  
 * SPIRAL-alignemnt  
-** embeddings of SPIRAL-integration 
-Demo can be obtained in Run_Spiral.ipynb
+ * Input    
+   embeddings of SPIRAL-integration: Ncell x zdim  
+   clusters  
+ * Ouput  
+   aligned coordinates: Ncell x 2  
+* Demo can be obtained in Run_Spiral.ipynb
 # Installing
 download SPIRAL-main.zip  
 cd SPIRAL-main  
