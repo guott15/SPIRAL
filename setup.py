@@ -32,7 +32,7 @@ setup(
     author = __author__,
     author_email = __author_email__,
     license = __license__,
-    packages = ['SPIRAL'],
+    packages = ['spiral'],
     install_requires = __requires__,
     zip_safe = False,
     long_description = __long_description__,
