@@ -1,0 +1,15 @@
+numpy>=1.19.5
+pandas>=1.1.5
+scipy>=1.5.4
+scikit-learn>=0.24.2
+argparse>=1.1
+tqdm>=4.62.1
+torch==1.1.0
+matplotlib>=3.3.4
+scanpy>=1.7.2
+umap>=0.5.1
+networkx>=2.5.1
+ot>=0.8.0
+rpy2>=3.4.5
+random
+math

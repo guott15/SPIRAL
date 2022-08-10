@@ -6,13 +6,11 @@
 
 import os
 import numpy as np
-import networkx as nx
 
 
 import pandas as pd
 from sklearn.preprocessing import minmax_scale
 from sklearn.decomposition import PCA
-from operator import itemgetter
 import random
 import matplotlib.pyplot as plt
 import umap.umap_ as umap
@@ -24,10 +22,10 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset,TensorDataset,DataLoader
 from torch.optim import Adam
 
-from pytorch_revgrad import RevGrad
-from model import *
-from utils import *
-from layers import MeanAggregator, LSTMAggregator, MaxPoolAggregator, MeanPoolAggregator,PoolAggregator
+from .pytorch_revgrad import RevGrad
+from .model import *
+from .utils import *
+from .layers import MeanAggregator, LSTMAggregator, MaxPoolAggregator, MeanPoolAggregator,PoolAggregator
 import sys
 from tqdm import tqdm
 
