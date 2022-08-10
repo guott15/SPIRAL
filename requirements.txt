@@ -12,4 +12,3 @@ networkx>=2.5.1
 ot>=0.8.0
 rpy2>=3.4.5
 random
-math
