@@ -22,7 +22,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset,TensorDataset,DataLoader
 from torch.optim import Adam
 
-from pytorch_revgrad import RevGrad
+from ..pytorch_revgrad import RevGrad
 from .model import *
 from .utils import *
 from .layers import MeanAggregator, LSTMAggregator, MaxPoolAggregator, MeanPoolAggregator,PoolAggregator
@@ -71,9 +71,13 @@ class SPIRAL_integration:
             for epoch in np.arange(0,self.epochs):
                 total_loss=0.0;AE_loss=0.0;GS_loss=0.0;CLAS_loss=0;DISC_loss=0
                 t=time.time()
+                IDX=[]
                 for (batch_idx, target_idx) in enumerate(self.data_loader):
+                    if len(np.unique(np.array(IDX)))==feat.shape[0]:
+                        break
                     target_idx=target_idx[0]
                     all_idx=np.asarray(list(self.unsupervised_loss.extend_nodes(target_idx.tolist())))
+                    IDX=IDX+all_idx.tolist()
                     all_layer,all_mapping=layer_map(all_idx.tolist(),self.adj,len(self.params.GSdims))
                     all_rows=self.adj.tolil().rows[all_layer[0]]
                     all_feature=torch.Tensor(self.feat.iloc[all_layer[0],:].values).float().cuda()
