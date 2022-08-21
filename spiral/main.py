@@ -73,7 +73,7 @@ class SPIRAL_integration:
                 t=time.time()
                 IDX=[]
                 for (batch_idx, target_idx) in enumerate(self.data_loader):
-                    if len(np.unique(np.array(IDX)))==feat.shape[0]:
+                    if len(np.unique(np.array(IDX)))==self.feat.shape[0]:
                         break
                     target_idx=target_idx[0]
                     all_idx=np.asarray(list(self.unsupervised_loss.extend_nodes(target_idx.tolist())))
