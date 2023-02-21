@@ -142,11 +142,16 @@ def get_negtive_nodes(nodes,dist,adj,N_WALK_LEN,NUM_NEG,dist_aware):
 def load_data(feat_file,edge_file,SEP,dist_aware=True,hvg_file=None):
     feat=pd.read_csv(feat_file[0],header=0,index_col=0,sep=SEP)
     edge=np.loadtxt(edge_file[0],dtype=str)
+    batch={}
+    for i in np.arange(feat.shape[0]):
+        batch[i]=np.arange(feat.shape[0])
     if len(edge.shape)<2:
         edge=np.array([[i.split(":")[0],i.split(":")[1]] for i in edge])
     if len(feat_file)>1:
         for k in np.arange(1,len(feat_file)):
             a=pd.read_csv(feat_file[k],header=0,index_col=0,sep=SEP)
+            for i in np.arange(feat.shape[0],a.shape[0]+feat.shape[0]):
+                batch[i]= np.arange(feat.shape[0],a.shape[0]+feat.shape[0])
             if hvg_file is not None:
                 a=a.loc[:,np.loadtxt(hvg_file,dtype=str)]
             feat=pd.concat((feat,a),axis=0)
@@ -160,17 +165,15 @@ def load_data(feat_file,edge_file,SEP,dist_aware=True,hvg_file=None):
     adj=process_adj(edge,feat.shape[0])
 #     pos_pairs=generate_pos_pair(adj.todense(),feat.index,N_WALKS,WALK_LEN)
 #     pos_pairs=np.array([[node_mapping[i[0]],node_mapping[i[1]]] for i in pos_pairs])
-    G=nx.Graph([(i[0],i[1]) for i in edge])
-    dist=dict(nx.all_pairs_shortest_path_length(G))
-    nodes=list(dist.keys())
+    nodes=np.arange(feat.shape[0])
 #     neg_pairs=np.array(get_negtive_nodes(nodes,dist,adj,N_WALK_LEN,NUM_NEG,dist_aware))
 #     dataset=TensorDataset(torch.Tensor(list(node_mapping.values())).int(),torch.cat((torch.zeros(num1),torch.ones(num2))).int())
     dataset=TensorDataset(torch.Tensor(list(nodes)).int())
-    return dataset,feat,adj,dist
+    return dataset,feat,adj,batch
 
 class UnsupervisedLoss(object):
     """docstring for UnsupervisedLoss"""
-    def __init__(self, adj_lists, dist, Q=10,N_WALKS=6,WALK_LEN=1,N_WALK_LEN=5,num_neg=6,MARGIN=3):
+    def __init__(self, adj_lists, batch, Q=10,N_WALKS=6,WALK_LEN=1,N_WALK_LEN=5,num_neg=6,MARGIN=3):
         super(UnsupervisedLoss, self).__init__()
         self.Q = Q
         self.N_WALKS = N_WALKS
@@ -179,7 +182,7 @@ class UnsupervisedLoss(object):
         self.MARGIN = MARGIN
         self.num_neg = num_neg
         self.adj_lists = adj_lists
-        self.dist = dist
+        self.batch = batch
 
         self.target_nodes = None
         self.positive_pairs = []
@@ -286,8 +289,8 @@ class UnsupervisedLoss(object):
                     current |= set(self.adj_lists[int(outer)])
                 frontier = current - neighbors
                 neighbors |= current
-            a=self.dist[node]
-            train_nodes = set(list(a.keys()))
+            a=self.batch[node]
+            train_nodes = set(list(a))
             far_nodes = train_nodes - neighbors
             neg_samples = random.sample(far_nodes, self.num_neg) if self.num_neg < len(far_nodes) else far_nodes
             self.negtive_pairs.extend([(node, neg_node) for neg_node in neg_samples])
