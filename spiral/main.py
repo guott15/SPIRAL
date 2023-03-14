@@ -80,7 +80,7 @@ class SPIRAL_integration:
                     IDX=IDX+all_idx.tolist()
                     all_layer,all_mapping=layer_map(all_idx.tolist(),self.adj,len(self.params.GSdims))
                     all_rows=self.adj.tolil().rows[all_layer[0]]
-                    all_feature=torch.Tensor(self.feat.iloc[all_layer[0],:].values).float().cuda()
+                    all_feature=self.feat1[all_layer[0],:].cuda()
                     all_embed,ae_out,clas_out,disc_out=self.model(all_feature,all_layer,all_mapping,all_rows,self.params.lamda,self.de_act,self.cl_act)
                     [ae_embed,gs_embed,embed]=all_embed
                     [x_bar,x]=ae_out
