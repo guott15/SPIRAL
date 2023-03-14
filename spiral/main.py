@@ -51,7 +51,7 @@ class SPIRAL_integration:
         self.optim=Adam(self.model.parameters(),lr=self.params.lr,weight_decay=self.params.weight_decay)
         self.epochs= self.params.epochs
         self.BS=self.params.batch_size
-        self.dataset,self.Y,self.adj,self.dist,self.feat,self.meta=self.prepare_data(feat_file,edge_file,meta_file)
+        self.dataset,self.Y,self.adj,self.dist,self.feat,self.feat1,self.meta=self.prepare_data(feat_file,edge_file,meta_file)
         self.de_act=nn.Sigmoid() 
         self.sample_num=len(np.unique(self.Y))
         if self.sample_num==2:
@@ -122,6 +122,7 @@ class SPIRAL_integration:
         dataset,feat,adj,dist=load_data(feat_file,edge_file,SEP)
         x=minmax_scale(feat.values,axis=1)
         feat=pd.DataFrame(x,index=feat.index,columns=feat.columns)
+        feat1=torch.Tensor(feat.values).float()
         meta=pd.read_csv(meta_file[0],header=0,index_col=0)
         for i in np.arange(1,len(meta_file)):
             meta=pd.concat((meta,pd.read_csv(meta_file[i],header=0,index_col=0)),axis=0)
@@ -130,10 +131,7 @@ class SPIRAL_integration:
         Y=np.zeros(meta.shape[0])
         for i in range(len(ub)):
             Y[np.where(meta[:,1]==ub[i])[0]]=i
-        return dataset,Y,adj,dist,feat,meta
-
-
-# In[ ]:
+        return dataset,Y,adj,dist,feat,feat1,meta
 
 
 
