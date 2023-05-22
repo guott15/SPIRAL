@@ -22,7 +22,7 @@ SPIRAL consistis two consective modules
 git clone https://github.com/guott15/SPIRAL.git  
 cd SPIRAL  
 python setup.py build  
-python setup.by install  
+python setup.py install  
 #### Note: pytorch_revgrad should be in your current path.
 # Data
 data are stored at https://drive.google.com/drive/folders/1ujS3504u1Ge0wT3_LcCbGk_DNZut2SeK
