@@ -29,7 +29,7 @@ import time
 from pytorch_revgrad import RevGrad
 from .layers import MeanAggregator, LSTMAggregator, MaxPoolAggregator, MeanPoolAggregator,PoolAggregator
 
-seed=12345
+
 
 def build_mlp(layers, activation=nn.ReLU(), bn=False, dropout=0,bias=True):
     net = nn.Sequential()
@@ -210,6 +210,13 @@ class GraphSAGE(nn.Module):
             self.bns=None
         self.dropout = nn.Dropout(dropout)
         self.relu = nn.ReLU()
+        self.init_weights()
+    def init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_normal_(m.weight.data)
+                if m.bias is not None:
+                    m.bias.data.zero_()
 
     def forward(self, features, node_layers, mappings, rows):
         out = features
