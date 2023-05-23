@@ -133,11 +133,10 @@ class SPIRAL_integration:
         meta=pd.read_csv(meta_file[0],header=0,index_col=0)
         for i in np.arange(1,len(meta_file)):
             meta=pd.concat((meta,pd.read_csv(meta_file[i],header=0,index_col=0)),axis=0)
-        meta=meta.values
-        ub=np.unique(meta[:,1])
+        ub=np.unique(meta.loc[:,'batch'])
         Y=np.zeros(meta.shape[0])
         for i in range(len(ub)):
-            Y[np.where(meta[:,1]==ub[i])[0]]=i
+            Y[np.where(meta.loc[:,'batch']==ub[i])[0]]=i
         return dataset,Y,adj,dist,feat,feat1,meta
 
 
