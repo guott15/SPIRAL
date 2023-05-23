@@ -102,7 +102,6 @@ class Decoder(nn.Module):
 class AE(nn.Module):
     def __init__(self, dims,dimsR):
         super(AE, self).__init__()
-        self.seed=seed
         self.en=Encoder(dims)
         self.de=Decoder(dimsR)
         self.init_weights()

@@ -40,12 +40,19 @@ from tqdm import tqdm
 
 # In[17]:
 
+def setup_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+
 
 class SPIRAL_integration:
     def __init__(self,params,feat_file,edge_file,meta_file):
         super(SPIRAL_integration, self).__init__()
-        
+
         self.params = params
+        setup_seed(self.params.seed)
         self.model=A_G_Combination_DA(self.params.AEdims, self.params.AEdimsR,self.params.GSdims,self.params.agg_class,self.params.num_samples,
                                       self.params.zdim,self.params.znoise_dim,self.params.beta,self.params.CLdims,self.params.DIdims).cuda()
         self.optim=Adam(self.model.parameters(),lr=self.params.lr,weight_decay=self.params.weight_decay)
