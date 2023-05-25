@@ -58,7 +58,7 @@ class SPIRAL_integration:
         self.optim=Adam(self.model.parameters(),lr=self.params.lr,weight_decay=self.params.weight_decay)
         self.epochs= self.params.epochs
         self.BS=self.params.batch_size
-        self.dataset,self.Y,self.adj,self.dist,self.feat,self.feat1,self.meta=self.prepare_data(feat_file,edge_file,meta_file)
+        self.dataset,self.Y,self.adj,self.dist,self.feat,self.meta=self.prepare_data(feat_file,edge_file,meta_file)
         self.de_act=nn.Sigmoid() 
         self.sample_num=len(np.unique(self.Y))
         if self.sample_num==2:
@@ -68,7 +68,8 @@ class SPIRAL_integration:
 
         self.data_loader=DataLoader(dataset=self.dataset, batch_size=self.BS,shuffle=True,num_workers=8,drop_last=True)
         self.unsupervised_loss=UnsupervisedLoss(self.adj.tolil().rows, self.dist, self.params.Q,self.params.N_WALKS,self.params.WALK_LEN,self.params.N_WALK_LEN,self.params.NUM_NEG)
-                                            
+        self.feat1=torch.Tensor(self.feat.values).float().cuda()
+        self.Y1=torch.Tensor(self.Y).cuda()                                  
     
     def train(self):
         self.model.train()
@@ -87,18 +88,18 @@ class SPIRAL_integration:
                     IDX=IDX+all_idx.tolist()
                     all_layer,all_mapping=layer_map(all_idx.tolist(),self.adj,len(self.params.GSdims))
                     all_rows=self.adj.tolil().rows[all_layer[0]]
-                    all_feature=self.feat1[all_layer[0],:].cuda()
+                    all_feature=self.feat1[all_layer[0],:]
                     all_embed,ae_out,clas_out,disc_out=self.model(all_feature,all_layer,all_mapping,all_rows,self.params.lamda,self.de_act,self.cl_act)
                     [ae_embed,gs_embed,embed]=all_embed
                     [x_bar,x]=ae_out
                     gs_loss = self.unsupervised_loss.get_loss_xent(embed, all_idx)
                     ae_loss=nn.BCELoss()(x_bar,x)
                     if self.sample_num==2:
-                        true_batch=torch.Tensor(self.Y[all_layer[-1]]).cuda()
+                        true_batch=self.Y1[all_layer[-1]]
                         clas_loss=nn.BCELoss()(clas_out,true_batch.reshape(-1,1))
                         disc_loss=nn.BCELoss()(disc_out,true_batch.reshape(-1,1))
                     else:
-                        true_batch=torch.Tensor(self.Y[all_layer[-1]]).long().cuda()
+                        true_batch=self.Y1[all_layer[-1]].long()
                         clas_loss=nn.CrossEntropyLoss()(clas_out,true_batch)
                         disc_loss=nn.CrossEntropyLoss()(disc_out,true_batch)
                     loss=ae_loss*self.params.alpha1+gs_loss*self.params.alpha2+clas_loss*self.params.alpha3+disc_loss*self.params.alpha4
@@ -129,7 +130,6 @@ class SPIRAL_integration:
         dataset,feat,adj,dist=load_data(feat_file,edge_file,SEP)
         x=minmax_scale(feat.values,axis=1)
         feat=pd.DataFrame(x,index=feat.index,columns=feat.columns)
-        feat1=torch.Tensor(feat.values).float()
         meta=pd.read_csv(meta_file[0],header=0,index_col=0)
         for i in np.arange(1,len(meta_file)):
             meta=pd.concat((meta,pd.read_csv(meta_file[i],header=0,index_col=0)),axis=0)
@@ -137,7 +137,7 @@ class SPIRAL_integration:
         Y=np.zeros(meta.shape[0])
         for i in range(len(ub)):
             Y[np.where(meta.loc[:,'batch']==ub[i])[0]]=i
-        return dataset,Y,adj,dist,feat,feat1,meta
+        return dataset,Y,adj,dist,feat,meta
 
 
 
