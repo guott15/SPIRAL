@@ -19,5 +19,3 @@ from .utils import *
 from .layers import *
 from .main import SPIRAL_integration
 from .CoordAlignment import CoordAlignment
-from .smooting_clustering import refine
-
