@@ -75,48 +75,50 @@ class SPIRAL_integration:
         self.model.train()
         print('--------------------------------')
         print('Training.')
-        with tqdm(total=self.epochs, file=sys.stdout) as pbar:
-            for epoch in np.arange(0,self.epochs):
-                total_loss=0.0;AE_loss=0.0;GS_loss=0.0;CLAS_loss=0;DISC_loss=0
-                t=time.time()
-                IDX=[]
-                for (batch_idx, target_idx) in enumerate(self.data_loader):
-                    if len(np.unique(np.array(IDX)))==self.feat.shape[0]:
-                        break
-                    target_idx=target_idx[0]
-                    all_idx=np.asarray(list(self.unsupervised_loss.extend_nodes(target_idx.tolist())))
-                    IDX=IDX+all_idx.tolist()
-                    all_layer,all_mapping=layer_map(all_idx.tolist(),self.adj,len(self.params.GSdims))
-                    all_rows=self.adj.tolil().rows[all_layer[0]]
-                    all_feature=self.feat1[all_layer[0],:]
-                    all_embed,ae_out,clas_out,disc_out=self.model(all_feature,all_layer,all_mapping,all_rows,self.params.lamda,self.de_act,self.cl_act)
-                    [ae_embed,gs_embed,embed]=all_embed
-                    [x_bar,x]=ae_out
-                    gs_loss = self.unsupervised_loss.get_loss_xent(embed, all_idx)
-                    ae_loss=nn.BCELoss()(x_bar,x)
-                    if self.sample_num==2:
-                        true_batch=self.Y1[all_layer[-1]]
-                        clas_loss=nn.BCELoss()(clas_out,true_batch.reshape(-1,1))
-                        disc_loss=nn.BCELoss()(disc_out,true_batch.reshape(-1,1))
-                    else:
-                        true_batch=self.Y1[all_layer[-1]].long()
-                        clas_loss=nn.CrossEntropyLoss()(clas_out,true_batch)
-                        disc_loss=nn.CrossEntropyLoss()(disc_out,true_batch)
-                    loss=ae_loss*self.params.alpha1+gs_loss*self.params.alpha2+clas_loss*self.params.alpha3+disc_loss*self.params.alpha4
+        # with tqdm(total=self.epochs, file=sys.stdout) as pbar:
+        for epoch in np.arange(0,self.epochs):
+            total_loss=0.0;AE_loss=0.0;GS_loss=0.0;CLAS_loss=0;DISC_loss=0
+            t=time.time()
+            IDX=[]
+            for (batch_idx, target_idx) in enumerate(self.data_loader):
+                if len(np.unique(np.array(IDX)))==self.feat.shape[0]:
+                    break
+                target_idx=target_idx[0]
+                all_idx=np.asarray(list(self.unsupervised_loss.extend_nodes(target_idx.tolist())))
+                IDX=IDX+all_idx.tolist()
+                all_layer,all_mapping=layer_map(all_idx.tolist(),self.adj,len(self.params.GSdims))
+                all_rows=self.adj.tolil().rows[all_layer[0]]
+                all_feature=self.feat1[all_layer[0],:]
+                all_embed,ae_out,clas_out,disc_out=self.model(all_feature,all_layer,all_mapping,all_rows,self.params.lamda,self.de_act,self.cl_act)
+                [ae_embed,gs_embed,embed]=all_embed
+                [x_bar,x]=ae_out
+                gs_loss = self.unsupervised_loss.get_loss_xent(embed, all_idx)
+                ae_loss=nn.BCELoss()(x_bar,x)
+                if self.sample_num==2:
+                    true_batch=self.Y1[all_layer[-1]]
+                    clas_loss=nn.BCELoss()(clas_out,true_batch.reshape(-1,1))
+                    disc_loss=nn.BCELoss()(disc_out,true_batch.reshape(-1,1))
+                else:
+                    true_batch=self.Y1[all_layer[-1]].long()
+                    clas_loss=nn.CrossEntropyLoss()(clas_out,true_batch)
+                    disc_loss=nn.CrossEntropyLoss()(disc_out,true_batch)
+                loss=ae_loss*self.params.alpha1+gs_loss*self.params.alpha2+clas_loss*self.params.alpha3+disc_loss*self.params.alpha4
 
-                    self.optim.zero_grad()
-                    loss.backward()
-                    self.optim.step()
-                    total_loss+=loss.item()
-                    AE_loss+=ae_loss.item()
-                    GS_loss+=gs_loss.item()
-                    CLAS_loss+=clas_loss.item()
-                    DISC_loss+=disc_loss.item()
+                self.optim.zero_grad()
+                loss.backward()
+                self.optim.step()
+                total_loss+=loss.item()
+                AE_loss+=ae_loss.item()
+                GS_loss+=gs_loss.item()
+                CLAS_loss+=clas_loss.item()
+                DISC_loss+=disc_loss.item()
 
-                aa=(batch_idx+1)    
-                pbar.set_description('processed: %d' % (1 + epoch))
-                pbar.set_postfix(total_loss=total_loss/aa,GS_loss=GS_loss/aa,CLAS_loss=CLAS_loss/aa,DISC_loss=DISC_loss/aa)
-                pbar.update(1)    
+            aa=(batch_idx+1)
+            print('total_loss/AE_loss/GS_loss/clas_loss/disc_loss=','%.5f/%.5f/%.5f/%.5f/%.5f'%(total_loss/aa,AE_loss/aa,GS_loss/aa,
+                                                                                   CLAS_loss/aa,DISC_loss/aa))    
+                # pbar.set_description('processed: %d' % (1 + epoch))
+                # pbar.set_postfix(total_loss=total_loss/aa,GS_loss=GS_loss/aa,CLAS_loss=CLAS_loss/aa,DISC_loss=DISC_loss/aa)
+                # pbar.update(1)    
     def save_model(self):
         torch.save(self.model.state_dict(),self.params.model_file)
         print('Saving model to %s' % self.params.model_file)
