@@ -43,6 +43,30 @@ from torch.utils.data import Dataset,TensorDataset,DataLoader
 
 # In[128]:
 
+def mclust_R(adata, num_cluster, modelNames='EEE', used_obsm='STAGATE', random_seed=2020):
+    """\
+    Clustering using the mclust algorithm.
+    The parameters are the same as those in the R package mclust.
+    """
+    
+    np.random.seed(random_seed)
+    import rpy2.robjects as robjects
+    robjects.r.library("mclust")
+
+    import rpy2.robjects.numpy2ri
+    rpy2.robjects.numpy2ri.activate()
+    r_random_seed = robjects.r['set.seed']
+    r_random_seed(random_seed)
+    rmclust = robjects.r['Mclust']
+
+    res = rmclust(rpy2.robjects.numpy2ri.numpy2rpy(adata.obsm[used_obsm]), num_cluster, modelNames)
+    mclust_res = np.array(res[-2])
+
+    adata.obs['mclust'] = mclust_res
+    adata.obs['mclust'] = adata.obs['mclust'].astype('int')
+    adata.obs['mclust'] = adata.obs['mclust'].astype('category')
+    return adata
+
 def refine(sample_id, pred, dis, num_nbs=8):
     refined_pred=[]
     pred=pd.DataFrame({"pred": pred}, index=sample_id)
