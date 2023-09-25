@@ -4,7 +4,7 @@ scipy>=1.5.4
 scikit-learn>=0.24.2
 argparse>=1.1
 tqdm>=4.62.1
-torch==1.1.0
+torch>=1.1.0
 matplotlib>=3.3.4
 scanpy>=1.7.2
 umap>=0.5.1
