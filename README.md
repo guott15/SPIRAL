@@ -9,7 +9,7 @@ SPIRAL consistis two consective modules
  * Input  
    feature mat: Ncell x Ngene    
    edge mat: Nedge x 2    
-   meta mat: Ncell x 2: domain label and batch label  
+   meta mat: Ncell x 1 or Ncell x 2: batch label (necessary) or domain label (selective)
 * Output  
    embeddings: Ncell x zdim  
    recovery gene expression: Ncell x Ngene  
@@ -19,7 +19,7 @@ SPIRAL consistis two consective modules
    clusters  
  * Ouput  
    aligned coordinates: Ncell x 2  
-* **Demo can be obtained in Run_Spiral.ipynb**
+* **Demo can be obtained in Demo floder**
 # Installing
 git clone https://github.com/guott15/SPIRAL.git  
 cd SPIRAL  
