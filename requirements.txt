@@ -9,6 +9,6 @@ matplotlib>=3.3.4
 scanpy>=1.7.2
 umap>=0.5.1
 networkx>=2.5.1
-ot>=0.8.0
+ot==0.8.0
 rpy2>=3.4.5
 mclust
