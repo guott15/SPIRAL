@@ -58,10 +58,10 @@ class CoordAlignment:
         self.flags=flags
         self.clust_cate=clust_cate
         self.meta,self.Coord,self.clusters,self.embed,self.ub=self.inputs(meta_file,coord_file,embed_file,cluster_file,ub)
-        self.cc=self.AlignClust(self.embed,self.Coord,self.ub)
+        self.cc,self.ref_id=self.AlignClust(self.embed,self.Coord,self.ub)
         self.AlignPairs(self.Coord.iloc[:,2:],ub,nx)
         self.AlignCoordShared(self.embed,self.Coord,self.cc,ub,self.types)
-        self.AlignCoordSpecific(self.Coord,ub,R_dirs)
+#         self.AlignCoordSpecific(self.Coord,ub,R_dirs)
         self.New_Coord.to_csv(self.output_dirs+"gtt_new_coordinate"+self.flags+'_'+self.clust_cate+".csv")
 
     def inputs(self,meta_file,coord_file,embed_file,cluster_file,ub,znoise_dim=4):
@@ -78,30 +78,35 @@ class CoordAlignment:
             Coord=pd.concat((Coord,pd.read_csv(coord_file[i],header=0,index_col=0,sep=',')))
         Coord=Coord.loc[:,['x','y']]
         Coord.loc[:,'clusters']=clusters.loc[Coord.index,'clusters']
-        Coord.loc[:,'celltype']=meta.loc[Coord.index,'celltype']
         Coord.loc[:,'batch']=meta.loc[Coord.index,'batch']
         return meta,Coord,clusters,embed,ub
     
     def AlignClust(self,embed,Coord,ub):
-        cc=[[] for i in np.arange(len(ub)-1)]
-        c1=np.unique(Coord.loc[Coord.loc[:,'batch']==ub[0],'clusters'].values)
-        for i in np.arange(1,len(ub)):
-            cc[i-1]=np.intersect1d(c1,np.unique(Coord.loc[Coord.loc[:,'batch']==ub[i],'clusters'].values))
-        coord1=Coord.loc[Coord.loc[:,'batch']==ub[0],:]
-        for bb in np.arange(len(cc)):
+        cc=[[] for i in np.arange(len(ub))]
+        maxc=0
+        for i in np.arange(len(ub)):
+            x=len(np.unique(Coord.loc[Coord.loc[:,'batch']==ub[i],'clusters'].values))
+            if x>maxc:
+                ref_id=i
+                maxc=x
+        c1=np.unique(Coord.loc[Coord.loc[:,'batch']==ub[ref_id],'clusters'].values)
+        for i in np.arange(len(ub)):
+            cc[i]=np.intersect1d(c1,np.unique(Coord.loc[Coord.loc[:,'batch']==ub[i],'clusters'].values))
+        coord1=Coord.loc[Coord.loc[:,'batch']==ub[ref_id],:]
+        for bb in np.setdiff1d(np.arange(len(ub)),ref_id):
             uc=cc[bb]
-            coord2=Coord.loc[Coord.loc[:,"batch"]==ub[bb+1],]
+            coord2=Coord.loc[Coord.loc[:,"batch"]==ub[bb],]
             for clust in uc:
                 coord1_=coord1.loc[coord1.loc[:,'clusters']==clust,:]
                 coord2_=coord2.loc[coord2.loc[:,'clusters']==clust,:]
                 embed1_=embed.loc[coord1_.index,:]
                 embed2_=embed.loc[coord2_.index,:]
-                embed1_.to_csv(self.output_dirs+"embed_"+str(ub[0])+"_"+str(clust)+self.flags+".csv")
-                embed2_.to_csv(self.output_dirs+"embed_"+str(ub[bb+1])+"_"+str(clust)+self.flags+".csv")
-                coord1_.to_csv(self.output_dirs+"coord_"+str(ub[0])+"_"+str(clust)+self.flags+".csv")
-                coord2_.to_csv(self.output_dirs+"coord_"+str(ub[bb+1])+"_"+str(clust)+self.flags+".csv")
+                embed1_.to_csv(self.output_dirs+"embed_"+str(ub[ref_id])+"_"+str(clust)+self.flags+".csv")
+                embed2_.to_csv(self.output_dirs+"embed_"+str(ub[bb])+"_"+str(clust)+self.flags+".csv")
+                coord1_.to_csv(self.output_dirs+"coord_"+str(ub[ref_id])+"_"+str(clust)+self.flags+".csv")
+                coord2_.to_csv(self.output_dirs+"coord_"+str(ub[bb])+"_"+str(clust)+self.flags+".csv")
         Coord.iloc[:,2:].to_csv(self.output_dirs+"gtt_clusters"+self.flags+".csv")
-        return cc
+        return cc,ref_id
     
     def gwd(self,M, C1, C2, p, q, G_init = None, loss_fun='square_loss', alpha=0.5, armijo=False, log=False,numItermax=200):
         constC, hC1, hC2 = ot.gromov.init_matrix(C1, C2, p, q, loss_fun)
@@ -113,13 +118,13 @@ class CoordAlignment:
         return res
     
     def AlignPairs(self,clusters,ub,nx):
-        for i in np.arange(1,len(ub)):
-            uc=np.intersect1d(clusters['clusters'][clusters['batch']==ub[0]],
+        for i in np.setdiff1d(np.arange(len(ub)),self.ref_id):
+            uc=np.intersect1d(clusters['clusters'][clusters['batch']==ub[self.ref_id]],
                              clusters['clusters'][clusters['batch']==ub[i]])
             for clust in uc:
-                embed1=pd.read_csv(self.output_dirs+"embed_"+str(ub[0])+"_"+str(clust)+self.flags+".csv",header=0,index_col=0,sep=",")
+                embed1=pd.read_csv(self.output_dirs+"embed_"+str(ub[self.ref_id])+"_"+str(clust)+self.flags+".csv",header=0,index_col=0,sep=",")
                 embed2=pd.read_csv(self.output_dirs+"embed_"+str(ub[i])+"_"+str(clust)+self.flags+".csv",header=0,index_col=0,sep=",")
-                coord1=pd.read_csv(self.output_dirs+"coord_"+str(ub[0])+"_"+str(clust)+self.flags+".csv",header=0,index_col=0,sep=",")
+                coord1=pd.read_csv(self.output_dirs+"coord_"+str(ub[self.ref_id])+"_"+str(clust)+self.flags+".csv",header=0,index_col=0,sep=",")
                 coord2=pd.read_csv(self.output_dirs+"coord_"+str(ub[i])+"_"+str(clust)+self.flags+".csv",header=0,index_col=0,sep=",")
                 coord1=coord1.loc[embed1.index,:]
                 coord2=coord2.loc[embed2.index,:]
@@ -147,22 +152,22 @@ class CoordAlignment:
                 G0 = d1[:, None] * d2[None, :]
                 res=self.gwd(M,D1,D2,d1,d2,G_init=G0,alpha=self.alpha)
                 pi=pd.DataFrame(res,index=embed1.index,columns=embed2.index)
-                pi.to_csv(self.output_dirs+"gwd_pi_"+str(ub[0])+"_"+str(ub[i])+"_"+str(clust)+self.flags+".csv")
+                pi.to_csv(self.output_dirs+"gwd_pi_"+str(ub[self.ref_id])+"_"+str(ub[i])+"_"+str(clust)+self.flags+".csv")
                 
     def AlignCoordShared(self,embed,Coord,cc,ub,types):
-        coord1=Coord.loc[Coord.loc[:,'batch']==ub[0],:]
+        coord1=Coord.loc[Coord.loc[:,'batch']==ub[self.ref_id],:]
         self.New_Coord=coord1
-        for bb in np.arange(len(cc)):
+        for bb in np.setdiff1d(np.arange(len(ub)),self.ref_id):
 
             uc=cc[bb]
-            coord2=Coord.loc[Coord.loc[:,'batch']==ub[bb+1],:]
+            coord2=Coord.loc[Coord.loc[:,'batch']==ub[bb],:]
             for clust in uc:
 
                 coord1_=coord1.loc[coord1.loc[:,'clusters']==clust,:]
                 coord2_=coord2.loc[coord2.loc[:,'clusters']==clust,:]
                 embed1_=embed.loc[coord1_.index,:]
                 embed2_=embed.loc[coord2_.index,:]
-                pi=pd.read_csv(self.output_dirs+"gwd_pi_"+str(ub[0])+"_"+str(ub[bb+1])+"_"+str(clust)+self.flags+".csv",index_col=0,header=0,sep=',')
+                pi=pd.read_csv(self.output_dirs+"gwd_pi_"+str(ub[self.ref_id])+"_"+str(ub[bb])+"_"+str(clust)+self.flags+".csv",index_col=0,header=0,sep=',')
 
                 pi=pi.loc[coord1_.index,coord2_.index]
                 new_coord2=coord2_
@@ -185,11 +190,9 @@ class CoordAlignment:
         robjects.r.library("vegan")
         rpy2.robjects.numpy2ri.activate()
         base = importr('base')
-        for i in range(len(self.cc)):
-            coord1_=Coord.loc[Coord.loc[:,'batch']==ub[i+1],:]
-            uc1=np.unique(coord1_.loc[:,'clusters'])
-            sc=np.setdiff1d(uc1,self.cc[i])
-            new=self.New_Coord.loc[self.New_Coord.loc[:,'batch']==ub[i+1],:]
+        for i in np.setdiff1d(np.arange(len(ub)),self.ref_id):
+            sc=np.setdiff1d(self.cc[i],self.cc[self.ref_id])
+            new=self.New_Coord.loc[self.New_Coord.loc[:,'batch']==ub[i],:]
             old=Coord.loc[new.index,:]
             if len(sc)>0:
                 PROCRUSTES=robjects.r['procrustes'](base.as_matrix(new.iloc[:,:2].values),base.as_matrix(old.iloc[:,:2].values),scale=False)
