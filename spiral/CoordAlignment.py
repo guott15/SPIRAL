@@ -61,7 +61,7 @@ class CoordAlignment:
         self.cc,self.ref_id=self.AlignClust(self.embed,self.Coord,self.ub)
         self.AlignPairs(self.Coord.iloc[:,2:],ub,nx)
         self.AlignCoordShared(self.embed,self.Coord,self.cc,ub,self.types)
-#         self.AlignCoordSpecific(self.Coord,ub,R_dirs)
+        self.AlignCoordSpecific(self.Coord,ub,R_dirs)
         self.New_Coord.to_csv(self.output_dirs+"gtt_new_coordinate"+self.flags+'_'+self.clust_cate+".csv")
 
     def inputs(self,meta_file,coord_file,embed_file,cluster_file,ub,znoise_dim=4):
@@ -191,14 +191,15 @@ class CoordAlignment:
         rpy2.robjects.numpy2ri.activate()
         base = importr('base')
         for i in np.setdiff1d(np.arange(len(ub)),self.ref_id):
-            sc=np.setdiff1d(self.cc[i],self.cc[self.ref_id])
+            sc=np.setdiff1d(np.unique(Coord.loc[Coord.loc[:,'batch']==ub[i],'clusters']),self.cc[i])                
             new=self.New_Coord.loc[self.New_Coord.loc[:,'batch']==ub[i],:]
             old=Coord.loc[new.index,:]
+            Coord1=Coord.iloc[np.where(Coord.loc[:,'batch']==ub[i])[0],:]
             if len(sc)>0:
                 PROCRUSTES=robjects.r['procrustes'](base.as_matrix(new.iloc[:,:2].values),base.as_matrix(old.iloc[:,:2].values),scale=False)
                 idx=[]
                 for j in sc:
-                    idx=idx+np.where(Coord.loc[:,'clusters']==j)[0].tolist()
-                x1=Coord.iloc[idx,:]
+                    idx=idx+np.where(Coord1.loc[:,'clusters']==j)[0].tolist()
+                x1=Coord1.iloc[idx,:]
                 x1.iloc[:,:2]=robjects.r['predict'](PROCRUSTES, base.as_matrix(x1.iloc[:,:2].values))
                 self.New_Coord=pd.concat((self.New_Coord,x1))
